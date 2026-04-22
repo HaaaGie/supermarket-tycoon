@@ -14,7 +14,99 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      leaderboard: {
+        Row: {
+          day_reached: number
+          display_name: string
+          id: string
+          items_sold: number
+          prestige_level: number
+          reputation: number
+          total_earned: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          day_reached?: number
+          display_name?: string
+          id?: string
+          items_sold?: number
+          prestige_level?: number
+          reputation?: number
+          total_earned?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          day_reached?: number
+          display_name?: string
+          id?: string
+          items_sold?: number
+          prestige_level?: number
+          reputation?: number
+          total_earned?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      save_slots: {
+        Row: {
+          created_at: string
+          game_state: Json
+          id: string
+          slot_name: string
+          slot_number: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          game_state?: Json
+          id?: string
+          slot_name?: string
+          slot_number: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          game_state?: Json
+          id?: string
+          slot_name?: string
+          slot_number?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
