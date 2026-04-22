@@ -13,6 +13,10 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        heading: ['Fredoka', 'sans-serif'],
+        body: ['Inter', 'sans-serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -46,6 +50,14 @@ export default {
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
+        },
+        money: {
+          DEFAULT: "hsl(var(--money))",
+          foreground: "hsl(var(--money-foreground))",
+        },
+        reputation: {
+          DEFAULT: "hsl(var(--reputation))",
+          foreground: "hsl(var(--reputation-foreground))",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
