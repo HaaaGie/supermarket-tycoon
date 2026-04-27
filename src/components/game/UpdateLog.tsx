@@ -26,6 +26,17 @@ const TYPE_LABEL: Record<string, string> = {
 
 const UPDATE_LOGS: LogEntry[] = [
   {
+    version: 'v2.4',
+    date: '2026-04-27',
+    title: '🗄️ Players Database + Cooldown Harga 30s',
+    changes: [
+      { type: 'feat', text: '🗄️ DATABASE PEMAIN! Admin Panel kini punya tab "Players Database" — lihat semua pemain yang pernah login (email, nama, hari tertinggi, total uang, item terjual, prestige, reputasi). Berguna untuk tugas database / monitoring komunitas.' },
+      { type: 'feat', text: '📧 Email pemain otomatis tersimpan ke Lovable Cloud setiap kali login (Google atau Email/Password).' },
+      { type: 'balance', text: '⏱️ Cooldown ubah harga jual rak dipangkas dari 3 menit → 30 detik. Tetap mencegah spam tweak, tapi jauh lebih nyaman saat balancing.' },
+      { type: 'fix', text: 'Polish minor pada tampilan admin & sinkronisasi leaderboard saat pemain baru pertama kali login.' },
+    ],
+  },
+  {
     version: 'v2.3',
     date: '2026-04-20',
     title: '📱 Mobile App + Daily Bonus + Theme Fix Permanent',
