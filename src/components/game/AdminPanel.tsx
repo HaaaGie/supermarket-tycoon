@@ -9,6 +9,20 @@ import { supabase } from '@/integrations/supabase/client';
 
 const ADMIN_PASSWORD = 'Ejebeh123';
 
+type PlayerRow = {
+  user_id: string;
+  email: string | null;
+  display_name: string | null;
+  avatar_url: string | null;
+  created_at: string;
+  day_reached: number;
+  total_earned: number;
+  items_sold: number;
+  prestige_level: number;
+  reputation: number;
+  last_active: string | null;
+};
+
 export default function AdminPanel() {
   const { state, dispatch } = useGame();
   const [open, setOpen] = useState(false);
@@ -17,6 +31,45 @@ export default function AdminPanel() {
   const [error, setError] = useState('');
   const [money, setMoney] = useState('');
   const [gems, setGems] = useState('');
+  const [players, setPlayers] = useState<PlayerRow[]>([]);
+  const [loadingPlayers, setLoadingPlayers] = useState(false);
+  const [playerSearch, setPlayerSearch] = useState('');
+
+  const fetchPlayers = async () => {
+    setLoadingPlayers(true);
+    try {
+      const [{ data: profiles }, { data: lb }] = await Promise.all([
+        supabase.from('profiles').select('user_id,email,display_name,avatar_url,created_at').order('created_at', { ascending: false }).limit(500),
+        supabase.from('leaderboard').select('user_id,day_reached,total_earned,items_sold,prestige_level,reputation,updated_at').limit(500),
+      ]);
+      const lbMap = new Map((lb || []).map(r => [r.user_id, r]));
+      const merged: PlayerRow[] = (profiles || []).map(p => {
+        const l = lbMap.get(p.user_id);
+        return {
+          user_id: p.user_id,
+          email: p.email,
+          display_name: p.display_name,
+          avatar_url: p.avatar_url,
+          created_at: p.created_at,
+          day_reached: l?.day_reached || 0,
+          total_earned: Number(l?.total_earned || 0),
+          items_sold: Number(l?.items_sold || 0),
+          prestige_level: l?.prestige_level || 0,
+          reputation: l?.reputation || 0,
+          last_active: l?.updated_at || null,
+        };
+      });
+      setPlayers(merged);
+    } catch (e) {
+      console.error('Fetch players failed', e);
+    } finally {
+      setLoadingPlayers(false);
+    }
+  };
+
+  useEffect(() => {
+    if (authenticated && open) fetchPlayers();
+  }, [authenticated, open]);
 
   const handleLogin = () => {
     if (password === ADMIN_PASSWORD) {
