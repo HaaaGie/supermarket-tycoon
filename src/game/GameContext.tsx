@@ -999,7 +999,7 @@ function gameReducer(state: GameState, action: Action): GameState {
     }
 
     case 'SET_SELL_PRICE': {
-      const SHELF_PRICE_COOLDOWN_MS = 180_000; // 3 real minutes
+      const SHELF_PRICE_COOLDOWN_MS = 30_000; // 30 real seconds
       const shelf = state.shelves.find(s => s.id === action.shelfId);
       if (!shelf) return state;
       const now = Date.now();
