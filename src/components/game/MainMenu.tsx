@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { INITIAL_STATE, type GameState } from '@/game/GameContext';
 import type { User } from '@supabase/supabase-js';
+import { toast } from 'sonner';
 import UpdateLog, { LATEST_VERSION } from './UpdateLog';
 import Tutorial from './Tutorial';
 import InstallPrompt from './InstallPrompt';
@@ -86,18 +87,32 @@ export default function MainMenu({ onStartGame }: MainMenuProps) {
   const handleGoogleLogin = async () => {
     setSigningIn(true);
     try {
+      // Pakai redirect_uri = current URL biar setelah Google auth, user balik
+      // ke halaman yang sama (tanpa kehilangan state route).
       const result = await lovable.auth.signInWithOAuth('google', {
-        redirect_uri: window.location.origin,
-        // Force account picker — pastikan user verifikasi akun Google sebelum masuk
+        redirect_uri: window.location.href.split('?')[0].split('#')[0],
         extraParams: { prompt: 'select_account' },
       });
       if (result.error) {
-        console.error('Login error:', result.error);
+        console.error('Google login error:', result.error);
+        toast.error('Gagal masuk dengan Google', {
+          description: (result.error as any)?.message || 'Coba lagi atau cek koneksi internet kamu.',
+        });
+        setSigningIn(false);
+        return;
       }
-    } catch (e) {
+      // Kalau redirected = true, browser sedang pindah ke Google → biarkan.
+      // Kalau tokens diterima langsung, onAuthStateChange akan handle session.
+      if (!result.redirected) {
+        setSigningIn(false);
+      }
+    } catch (e: any) {
       console.error(e);
+      toast.error('Gagal masuk dengan Google', {
+        description: e?.message || 'Terjadi kesalahan tak terduga.',
+      });
+      setSigningIn(false);
     }
-    setSigningIn(false);
   };
 
   const handleLogout = async () => {
