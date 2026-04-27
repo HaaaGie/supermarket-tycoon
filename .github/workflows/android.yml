@@ -10,45 +10,41 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout repo
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      # 2. Setup Node (WAJIB Node 22 untuk Capacitor terbaru)
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
 
-      # 3. Install dependencies
       - name: Install dependencies
         run: npm install
 
-      # 4. Build web (Vite)
       - name: Build web app
         run: npm run build
 
-      # 5. Sync Capacitor ke Android (tanpa add android)
+      # 🔥 FIX UTAMA: tambah android platform
+      - name: Add Android platform (if needed)
+        run: npx cap add android
+
       - name: Sync Capacitor
         run: npx cap sync android
 
-      # 6. Setup Java (untuk Gradle)
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
 
-      # 7. Build APK (Debug)
-      - name: Build Android APK
+      - name: Build APK
         run: |
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
 
-      # 8. Upload APK hasil build
-      - name: Upload APK artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: supermarket-apk
