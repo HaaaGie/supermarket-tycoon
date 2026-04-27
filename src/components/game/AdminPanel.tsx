@@ -232,6 +232,69 @@ export default function AdminPanel() {
             </CardContent>
           </Card>
 
+          {/* Players Database */}
+          <Card>
+            <CardHeader className="pb-2 flex-row items-center justify-between space-y-0">
+              <CardTitle className="text-sm font-heading">🗄️ Players Database ({players.length})</CardTitle>
+              <Button size="sm" variant="outline" onClick={fetchPlayers} disabled={loadingPlayers}>
+                {loadingPlayers ? '…' : '🔄 Refresh'}
+              </Button>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <Input
+                placeholder="Cari email atau nama…"
+                value={playerSearch}
+                onChange={e => setPlayerSearch(e.target.value)}
+                className="h-8 text-xs"
+              />
+              <div className="max-h-72 overflow-y-auto rounded border border-border">
+                <table className="w-full text-xs">
+                  <thead className="bg-muted/50 sticky top-0">
+                    <tr className="text-left">
+                      <th className="px-2 py-1 font-heading">Email / Nama</th>
+                      <th className="px-2 py-1 font-heading">Hari</th>
+                      <th className="px-2 py-1 font-heading">$ Total</th>
+                      <th className="px-2 py-1 font-heading">Sold</th>
+                      <th className="px-2 py-1 font-heading">⭐</th>
+                      <th className="px-2 py-1 font-heading">P</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {players
+                      .filter(p => {
+                        const q = playerSearch.toLowerCase().trim();
+                        if (!q) return true;
+                        return (p.email || '').toLowerCase().includes(q) || (p.display_name || '').toLowerCase().includes(q);
+                      })
+                      .map(p => (
+                        <tr key={p.user_id} className="border-t border-border hover:bg-muted/30">
+                          <td className="px-2 py-1">
+                            <div className="font-medium text-foreground truncate max-w-[160px]" title={p.email || ''}>
+                              {p.email || '(tanpa email)'}
+                            </div>
+                            <div className="text-muted-foreground text-[10px] truncate max-w-[160px]">
+                              {p.display_name || '—'}
+                            </div>
+                          </td>
+                          <td className="px-2 py-1">{p.day_reached}</td>
+                          <td className="px-2 py-1">${p.total_earned.toLocaleString()}</td>
+                          <td className="px-2 py-1">{p.items_sold.toLocaleString()}</td>
+                          <td className="px-2 py-1">{p.reputation}</td>
+                          <td className="px-2 py-1">{p.prestige_level}</td>
+                        </tr>
+                      ))}
+                    {!loadingPlayers && players.length === 0 && (
+                      <tr><td colSpan={6} className="px-2 py-3 text-center text-muted-foreground">Belum ada pemain.</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+              <p className="text-[10px] text-muted-foreground">
+                Data dari Lovable Cloud · email & progress disinkronkan otomatis saat pemain login & bermain.
+              </p>
+            </CardContent>
+          </Card>
+
           <Button variant="ghost" size="sm" className="w-full text-muted-foreground" onClick={() => { setAuthenticated(false); setPassword(''); setOpen(false); }}>
             🔒 Logout Admin
           </Button>
