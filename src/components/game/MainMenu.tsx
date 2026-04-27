@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { INITIAL_STATE, type GameState } from '@/game/GameContext';
 import type { User } from '@supabase/supabase-js';
+import { toast } from 'sonner';
 import UpdateLog, { LATEST_VERSION } from './UpdateLog';
 import Tutorial from './Tutorial';
 import InstallPrompt from './InstallPrompt';
