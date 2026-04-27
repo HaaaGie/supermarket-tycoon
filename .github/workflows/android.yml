@@ -1,48 +1,54 @@
-name: Build APK
+name: Build Android APK
 
 on:
   push:
     branches: ["main"]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      # 1. Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      # 2. Setup Node (WAJIB Node 22 untuk Capacitor terbaru)
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 22
+          cache: npm
 
+      # 3. Install dependencies
       - name: Install dependencies
         run: npm install
 
-      - name: Build web
+      # 4. Build web (Vite)
+      - name: Build web app
         run: npm run build
 
-      # 🔥 WAJIB: tambah ini
-      - name: Add Android platform
-        run: npx cap add android
-
+      # 5. Sync Capacitor ke Android (tanpa add android)
       - name: Sync Capacitor
         run: npx cap sync android
 
+      # 6. Setup Java (untuk Gradle)
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
 
-      - name: Build APK
+      # 7. Build APK (Debug)
+      - name: Build Android APK
         run: |
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
 
-      - name: Upload APK
+      # 8. Upload APK hasil build
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: supermarket-apk
