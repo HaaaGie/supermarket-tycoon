@@ -2,7 +2,7 @@ name: Build APK
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build:
@@ -22,6 +22,10 @@ jobs:
 
       - name: Build web
         run: npm run build
+
+      # 🔥 WAJIB: tambah ini
+      - name: Add Android platform
+        run: npx cap add android
 
       - name: Sync Capacitor
         run: npx cap sync android
