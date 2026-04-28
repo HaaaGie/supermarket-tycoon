@@ -203,6 +203,7 @@ type Action =
   | { type: 'BUY_SHELF'; shelfTypeId: string }
   | { type: 'ASSIGN_PRODUCT'; shelfId: string; productId: string }
   | { type: 'RESTOCK_SHELF'; shelfId: string; amount: number }
+  | { type: 'RESTOCK_ALL_SHELVES' }
   | { type: 'HIRE_EMPLOYEE'; typeId: string }
   | { type: 'FIRE_EMPLOYEE'; employeeId: string }
   | { type: 'BUY_UPGRADE'; upgradeId: string }
@@ -1032,6 +1033,29 @@ function gameReducer(state: GameState, action: Action): GameState {
           s.id === action.shelfId ? { ...s, currentStock: s.currentStock + toAdd } : s
         ),
       };
+    }
+
+    case 'RESTOCK_ALL_SHELVES': {
+      const newStock = { ...state.stock };
+      let totalAdded = 0;
+      const newShelves = state.shelves.map(s => {
+        if (!s.productId) return s;
+        const available = newStock[s.productId] || 0;
+        const spaceLeft = s.capacity - s.currentStock;
+        const toAdd = Math.min(available, spaceLeft);
+        if (toAdd <= 0) return s;
+        newStock[s.productId] = available - toAdd;
+        totalAdded += toAdd;
+        return { ...s, currentStock: s.currentStock + toAdd };
+      });
+      if (totalAdded <= 0) {
+        return addNotification(state, 'Tidak ada rak yang bisa di-restock (gudang kosong / rak penuh).', 'warning');
+      }
+      return addNotification(
+        { ...state, stock: newStock, shelves: newShelves },
+        `📦 Restock cepat: ${totalAdded} item dipindah ke rak.`,
+        'success'
+      );
     }
 
     case 'HIRE_EMPLOYEE': {

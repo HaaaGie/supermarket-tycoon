@@ -63,6 +63,21 @@ export default function ShelfManager() {
       </Card>
 
       {/* Existing Shelves */}
+      {state.shelves.length > 0 && (
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <h3 className="font-heading font-semibold text-sm text-foreground">
+            🗄️ Rak Aktif ({state.shelves.length})
+          </h3>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => dispatch({ type: 'RESTOCK_ALL_SHELVES' })}
+            title="Isi semua rak dari gudang sekaligus"
+          >
+            📦 Restock Semua Rak
+          </Button>
+        </div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {state.shelves.map(shelf => {
           const shelfType = SHELF_TYPES.find(s => s.id === shelf.shelfTypeId);
