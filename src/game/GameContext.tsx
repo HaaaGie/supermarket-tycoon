@@ -1059,7 +1059,46 @@ function gameReducer(state: GameState, action: Action): GameState {
       );
     }
 
-    case 'HIRE_EMPLOYEE': {
+    case 'SMART_PRICE_ALL': {
+      // "Smart Pricing" — set every shelf's price to the data-driven sweet spot
+      // (~1.15x baseSellPrice → keeps demand multiplier in the "👍 Laris" zone).
+      // Respects the per-shelf 30s price cooldown so it can't be spammed.
+      const SHELF_PRICE_COOLDOWN_MS = 30_000;
+      const SWEET_SPOT_MULT = 1.15;
+      const now = Date.now();
+      let updated = 0;
+      let skipped = 0;
+      const newShelves = state.shelves.map(s => {
+        if (!s.productId) return s;
+        const product = PRODUCTS.find(p => p.id === s.productId);
+        if (!product) return s;
+        const lastChange = s.lastPriceChangeAt || 0;
+        if (lastChange > 0 && now - lastChange < SHELF_PRICE_COOLDOWN_MS) {
+          skipped += 1;
+          return s;
+        }
+        const recommended = Math.max(1, Math.round(product.baseSellPrice * SWEET_SPOT_MULT));
+        if (recommended === s.customSellPrice) return s;
+        updated += 1;
+        return { ...s, customSellPrice: recommended, lastPriceChangeAt: now };
+      });
+      if (updated === 0) {
+        return addNotification(
+          state,
+          skipped > 0
+            ? `🤖 Smart Pricing: ${skipped} rak masih cooldown, tidak ada yang diubah.`
+            : '🤖 Smart Pricing: semua rak sudah optimal.',
+          'info'
+        );
+      }
+      return addNotification(
+        { ...state, shelves: newShelves },
+        `🤖 Smart Pricing: ${updated} rak di-set ke harga rekomendasi (${Math.round((SWEET_SPOT_MULT - 1) * 100)}% di atas harga dasar).${skipped > 0 ? ` ${skipped} rak masih cooldown.` : ''}`,
+        'success'
+      );
+    }
+
+
       const empType = EMPLOYEE_TYPES.find(e => e.id === action.typeId);
       if (!empType) return state;
       if (state.money < empType.baseSalary * 10) return addNotification(state, 'Uang tidak cukup! Biaya hiring = 10x gaji.', 'warning');
