@@ -68,14 +68,24 @@ export default function ShelfManager() {
           <h3 className="font-heading font-semibold text-sm text-foreground">
             🗄️ Rak Aktif ({state.shelves.length})
           </h3>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => dispatch({ type: 'RESTOCK_ALL_SHELVES' })}
-            title="Isi semua rak dari gudang sekaligus"
-          >
-            📦 Restock Semua Rak
-          </Button>
+          <div className="flex gap-2 flex-wrap">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => dispatch({ type: 'SMART_PRICE_ALL' })}
+              title="Set harga semua rak ke titik optimal berdasarkan kurva permintaan"
+            >
+              🤖 Smart Pricing
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => dispatch({ type: 'RESTOCK_ALL_SHELVES' })}
+              title="Isi semua rak dari gudang sekaligus"
+            >
+              📦 Restock Semua Rak
+            </Button>
+          </div>
         </div>
       )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
