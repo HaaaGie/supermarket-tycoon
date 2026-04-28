@@ -1,27 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useGame } from '@/game/GameContext';
 import { GACHA_ITEMS } from '@/game/gachaData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { supabase } from '@/integrations/supabase/client';
 
 const ADMIN_PASSWORD = 'Ejebeh123';
-
-type PlayerRow = {
-  user_id: string;
-  email: string | null;
-  display_name: string | null;
-  avatar_url: string | null;
-  created_at: string;
-  day_reached: number;
-  total_earned: number;
-  items_sold: number;
-  prestige_level: number;
-  reputation: number;
-  last_active: string | null;
-};
 
 export default function AdminPanel() {
   const { state, dispatch } = useGame();
@@ -31,45 +16,6 @@ export default function AdminPanel() {
   const [error, setError] = useState('');
   const [money, setMoney] = useState('');
   const [gems, setGems] = useState('');
-  const [players, setPlayers] = useState<PlayerRow[]>([]);
-  const [loadingPlayers, setLoadingPlayers] = useState(false);
-  const [playerSearch, setPlayerSearch] = useState('');
-
-  const fetchPlayers = async () => {
-    setLoadingPlayers(true);
-    try {
-      const [{ data: profiles }, { data: lb }] = await Promise.all([
-        supabase.from('profiles').select('user_id,email,display_name,avatar_url,created_at').order('created_at', { ascending: false }).limit(500),
-        supabase.from('leaderboard').select('user_id,day_reached,total_earned,items_sold,prestige_level,reputation,updated_at').limit(500),
-      ]);
-      const lbMap = new Map((lb || []).map(r => [r.user_id, r]));
-      const merged: PlayerRow[] = (profiles || []).map(p => {
-        const l = lbMap.get(p.user_id);
-        return {
-          user_id: p.user_id,
-          email: p.email,
-          display_name: p.display_name,
-          avatar_url: p.avatar_url,
-          created_at: p.created_at,
-          day_reached: l?.day_reached || 0,
-          total_earned: Number(l?.total_earned || 0),
-          items_sold: Number(l?.items_sold || 0),
-          prestige_level: l?.prestige_level || 0,
-          reputation: l?.reputation || 0,
-          last_active: l?.updated_at || null,
-        };
-      });
-      setPlayers(merged);
-    } catch (e) {
-      console.error('Fetch players failed', e);
-    } finally {
-      setLoadingPlayers(false);
-    }
-  };
-
-  useEffect(() => {
-    if (authenticated && open) fetchPlayers();
-  }, [authenticated, open]);
 
   const handleLogin = () => {
     if (password === ADMIN_PASSWORD) {
@@ -232,65 +178,16 @@ export default function AdminPanel() {
             </CardContent>
           </Card>
 
-          {/* Players Database */}
-          <Card>
-            <CardHeader className="pb-2 flex-row items-center justify-between space-y-0">
-              <CardTitle className="text-sm font-heading">🗄️ Players Database ({players.length})</CardTitle>
-              <Button size="sm" variant="outline" onClick={fetchPlayers} disabled={loadingPlayers}>
-                {loadingPlayers ? '…' : '🔄 Refresh'}
-              </Button>
+          {/* Database Notice */}
+          <Card className="border-dashed">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-heading">🗄️ Database Pemain</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
-              <Input
-                placeholder="Cari email atau nama…"
-                value={playerSearch}
-                onChange={e => setPlayerSearch(e.target.value)}
-                className="h-8 text-xs"
-              />
-              <div className="max-h-72 overflow-y-auto rounded border border-border">
-                <table className="w-full text-xs">
-                  <thead className="bg-muted/50 sticky top-0">
-                    <tr className="text-left">
-                      <th className="px-2 py-1 font-heading">Email / Nama</th>
-                      <th className="px-2 py-1 font-heading">Hari</th>
-                      <th className="px-2 py-1 font-heading">$ Total</th>
-                      <th className="px-2 py-1 font-heading">Sold</th>
-                      <th className="px-2 py-1 font-heading">⭐</th>
-                      <th className="px-2 py-1 font-heading">P</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {players
-                      .filter(p => {
-                        const q = playerSearch.toLowerCase().trim();
-                        if (!q) return true;
-                        return (p.email || '').toLowerCase().includes(q) || (p.display_name || '').toLowerCase().includes(q);
-                      })
-                      .map(p => (
-                        <tr key={p.user_id} className="border-t border-border hover:bg-muted/30">
-                          <td className="px-2 py-1">
-                            <div className="font-medium text-foreground truncate max-w-[160px]" title={p.email || ''}>
-                              {p.email || '(tanpa email)'}
-                            </div>
-                            <div className="text-muted-foreground text-[10px] truncate max-w-[160px]">
-                              {p.display_name || '—'}
-                            </div>
-                          </td>
-                          <td className="px-2 py-1">{p.day_reached}</td>
-                          <td className="px-2 py-1">${p.total_earned.toLocaleString()}</td>
-                          <td className="px-2 py-1">{p.items_sold.toLocaleString()}</td>
-                          <td className="px-2 py-1">{p.reputation}</td>
-                          <td className="px-2 py-1">{p.prestige_level}</td>
-                        </tr>
-                      ))}
-                    {!loadingPlayers && players.length === 0 && (
-                      <tr><td colSpan={6} className="px-2 py-3 text-center text-muted-foreground">Belum ada pemain.</td></tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-              <p className="text-[10px] text-muted-foreground">
-                Data dari Lovable Cloud · email & progress disinkronkan otomatis saat pemain login & bermain.
+            <CardContent>
+              <p className="text-xs text-muted-foreground">
+                Demi keamanan, data pemain (email, progress, dll) <strong>tidak lagi tersedia di sini</strong>.
+                Hanya pemilik project yang dapat melihatnya melalui <strong>Lovable Cloud → Database</strong>
+                (buka tabel <code className="px-1 rounded bg-muted">player_overview</code>).
               </p>
             </CardContent>
           </Card>

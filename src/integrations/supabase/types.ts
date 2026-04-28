@@ -112,7 +112,60 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      leaderboard_public: {
+        Row: {
+          day_reached: number | null
+          display_name: string | null
+          id: string | null
+          items_sold: number | null
+          prestige_level: number | null
+          reputation: number | null
+          total_earned: number | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          day_reached?: number | null
+          display_name?: string | null
+          id?: string | null
+          items_sold?: number | null
+          prestige_level?: number | null
+          reputation?: number | null
+          total_earned?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          day_reached?: number | null
+          display_name?: string | null
+          id?: string | null
+          items_sold?: number | null
+          prestige_level?: number | null
+          reputation?: number | null
+          total_earned?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      player_overview: {
+        Row: {
+          avatar_url: string | null
+          day_reached: number | null
+          display_name: string | null
+          email: string | null
+          items_sold: number | null
+          joined_at: string | null
+          last_active: string | null
+          prestige_level: number | null
+          profile_updated_at: string | null
+          reputation: number | null
+          save_slots_count: number | null
+          total_earned: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
