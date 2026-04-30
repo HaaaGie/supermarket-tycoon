@@ -207,6 +207,7 @@ type Action =
   | { type: 'RESTOCK_SHELF'; shelfId: string; amount: number }
   | { type: 'RESTOCK_ALL_SHELVES' }
   | { type: 'SMART_PRICE_ALL' }
+  | { type: 'ACTIVATE_HAPPY_HOUR' }
   | { type: 'HIRE_EMPLOYEE'; typeId: string }
   | { type: 'FIRE_EMPLOYEE'; employeeId: string }
   | { type: 'BUY_UPGRADE'; upgradeId: string }
