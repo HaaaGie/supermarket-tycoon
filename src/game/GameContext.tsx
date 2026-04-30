@@ -1125,6 +1125,7 @@ function gameReducer(state: GameState, action: Action): GameState {
     }
 
 
+    case 'HIRE_EMPLOYEE': {
       const empType = EMPLOYEE_TYPES.find(e => e.id === action.typeId);
       if (!empType) return state;
       if (state.money < empType.baseSalary * 10) return addNotification(state, 'Uang tidak cukup! Biaya hiring = 10x gaji.', 'warning');
