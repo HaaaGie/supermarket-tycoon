@@ -1101,8 +1101,30 @@ function gameReducer(state: GameState, action: Action): GameState {
       );
     }
 
+    case 'ACTIVATE_HAPPY_HOUR': {
+      // Player-triggered 60-second 2× sales boost. 5-minute cooldown.
+      const HAPPY_HOUR_COOLDOWN_MS = 5 * 60 * 1000;
+      const HAPPY_HOUR_DURATION_TICKS = 60; // 60 ticks ≈ 60s
+      const now = Date.now();
+      const last = state.lastHappyHourAt || 0;
+      if (last > 0 && now - last < HAPPY_HOUR_COOLDOWN_MS) {
+        const remaining = Math.ceil((HAPPY_HOUR_COOLDOWN_MS - (now - last)) / 1000);
+        return addNotification(state, `⏳ Happy Hour masih cooldown ${remaining}s lagi.`, 'warning');
+      }
+      const newBuff: ActiveBuff = {
+        itemId: 'happy_hour',
+        stat: 'all',
+        multiplier: 2,
+        ticksLeft: HAPPY_HOUR_DURATION_TICKS,
+      };
+      return addNotification(
+        { ...state, activeBuffs: [...(state.activeBuffs || []), newBuff], lastHappyHourAt: now },
+        '🎉 HAPPY HOUR! Semua penjualan 2× selama 60 detik!',
+        'success'
+      );
+    }
 
-    case 'HIRE_EMPLOYEE': {
+
       const empType = EMPLOYEE_TYPES.find(e => e.id === action.typeId);
       if (!empType) return state;
       if (state.money < empType.baseSalary * 10) return addNotification(state, 'Uang tidak cukup! Biaya hiring = 10x gaji.', 'warning');
