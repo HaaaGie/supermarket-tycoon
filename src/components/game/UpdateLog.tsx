@@ -28,12 +28,13 @@ const UPDATE_LOGS: LogEntry[] = [
   {
     version: 'v2.5',
     date: '2026-04-28',
-    title: '🔐 Database Privat + Quick Restock + Smart Pricing',
+    title: '🔐 Database Privat + Quick Restock + Smart Pricing + Happy Hour',
     changes: [
       { type: 'fix', text: '🔐 KEAMANAN: Daftar pemain (email, progress) DIHAPUS dari Admin Panel. Sekarang hanya pemilik project yang bisa melihatnya lewat Lovable Cloud → Database (view `player_overview`). Password admin yang bocor tidak lagi membahayakan data pemain.' },
       { type: 'fix', text: '🛡️ Profil pemain dikunci: setiap user hanya bisa membaca profilnya sendiri. Email tidak lagi terekspos lewat API publik.' },
       { type: 'feat', text: '📦 TOMBOL "Restock Semua Rak" — isi semua rak dari gudang dalam 1 klik. Hemat waktu saat punya banyak rak!' },
       { type: 'feat', text: '🤖 SMART PRICING — tombol baru di tab Rak yang otomatis men-set harga semua rak ke titik optimal (sweet spot ~+15% dari harga dasar) berdasarkan kurva permintaan di gameData. Tetap menghormati cooldown 30 detik per rak.' },
+      { type: 'feat', text: '🎉 HAPPY HOUR — tombol baru di tab Rak yang langsung mengaktifkan boost 2× penjualan selama 60 detik. Cooldown 5 menit. Cocok dipakai di jam ramai untuk lonjakan profit instan.' },
       { type: 'feat', text: '🗄️ View admin baru `player_overview` di Lovable Cloud: gabungan email + nama + hari + total earned + items sold + reputation + prestige + last active + jumlah save slot. Cocok untuk monitoring & tugas database.' },
     ],
   },
