@@ -115,6 +115,8 @@ export interface GameState {
   lastDailyClaimAt?: number;       // ms timestamp of last daily bonus claim
   dailyStreak?: number;            // consecutive days claimed
   lastSessionEndAt?: number;       // ms timestamp game was last seen
+  // v2.5 — Happy Hour boost (player-triggered 2x sales for 60s, 5min cooldown)
+  lastHappyHourAt?: number;
 }
 
 export interface ChoiceEventInstance {
