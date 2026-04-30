@@ -115,6 +115,8 @@ export interface GameState {
   lastDailyClaimAt?: number;       // ms timestamp of last daily bonus claim
   dailyStreak?: number;            // consecutive days claimed
   lastSessionEndAt?: number;       // ms timestamp game was last seen
+  // v2.5 — Happy Hour boost (player-triggered 2x sales for 60s, 5min cooldown)
+  lastHappyHourAt?: number;
 }
 
 export interface ChoiceEventInstance {
@@ -205,6 +207,7 @@ type Action =
   | { type: 'RESTOCK_SHELF'; shelfId: string; amount: number }
   | { type: 'RESTOCK_ALL_SHELVES' }
   | { type: 'SMART_PRICE_ALL' }
+  | { type: 'ACTIVATE_HAPPY_HOUR' }
   | { type: 'HIRE_EMPLOYEE'; typeId: string }
   | { type: 'FIRE_EMPLOYEE'; employeeId: string }
   | { type: 'BUY_UPGRADE'; upgradeId: string }
@@ -1094,6 +1097,29 @@ function gameReducer(state: GameState, action: Action): GameState {
       return addNotification(
         { ...state, shelves: newShelves },
         `🤖 Smart Pricing: ${updated} rak di-set ke harga rekomendasi (${Math.round((SWEET_SPOT_MULT - 1) * 100)}% di atas harga dasar).${skipped > 0 ? ` ${skipped} rak masih cooldown.` : ''}`,
+        'success'
+      );
+    }
+
+    case 'ACTIVATE_HAPPY_HOUR': {
+      // Player-triggered 60-second 2× sales boost. 5-minute cooldown.
+      const HAPPY_HOUR_COOLDOWN_MS = 5 * 60 * 1000;
+      const HAPPY_HOUR_DURATION_TICKS = 60; // 60 ticks ≈ 60s
+      const now = Date.now();
+      const last = state.lastHappyHourAt || 0;
+      if (last > 0 && now - last < HAPPY_HOUR_COOLDOWN_MS) {
+        const remaining = Math.ceil((HAPPY_HOUR_COOLDOWN_MS - (now - last)) / 1000);
+        return addNotification(state, `⏳ Happy Hour masih cooldown ${remaining}s lagi.`, 'warning');
+      }
+      const newBuff: ActiveBuff = {
+        itemId: 'happy_hour',
+        stat: 'all',
+        multiplier: 2,
+        ticksLeft: HAPPY_HOUR_DURATION_TICKS,
+      };
+      return addNotification(
+        { ...state, activeBuffs: [...(state.activeBuffs || []), newBuff], lastHappyHourAt: now },
+        '🎉 HAPPY HOUR! Semua penjualan 2× selama 60 detik!',
         'success'
       );
     }

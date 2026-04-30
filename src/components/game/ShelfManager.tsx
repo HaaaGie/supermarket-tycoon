@@ -80,6 +80,14 @@ export default function ShelfManager() {
             <Button
               size="sm"
               variant="outline"
+              onClick={() => dispatch({ type: 'ACTIVATE_HAPPY_HOUR' })}
+              title="Aktifkan boost 2× penjualan selama 60 detik (cooldown 5 menit)"
+            >
+              🎉 Happy Hour
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
               onClick={() => dispatch({ type: 'RESTOCK_ALL_SHELVES' })}
               title="Isi semua rak dari gudang sekaligus"
             >
