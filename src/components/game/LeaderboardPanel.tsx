@@ -158,7 +158,7 @@ export default function LeaderboardPanel() {
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <h2 className="text-lg font-heading font-bold">🏆 Leaderboard</h2>
-        <Button onClick={syncScore} disabled={syncing} size="sm">
+        <Button onClick={() => syncScore()} disabled={syncing} size="sm">
           {syncing ? '⏳ Menyimpan...' : '📤 Sync Skor'}
         </Button>
       </div>
