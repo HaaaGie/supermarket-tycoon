@@ -85,9 +85,9 @@ export default function LeaderboardPanel() {
     setLoading(false);
   };
 
-  const syncScore = async () => {
+  const syncScore = async (silent = false) => {
     if (!user) return;
-    setSyncing(true);
+    if (!silent) setSyncing(true);
     
     const profile = await supabase
       .from('profiles')
