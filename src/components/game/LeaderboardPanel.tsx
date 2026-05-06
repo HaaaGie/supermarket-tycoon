@@ -120,7 +120,7 @@ export default function LeaderboardPanel() {
       await supabase.from('leaderboard').insert(payload);
     }
 
-    setSyncing(false);
+    if (!silent) setSyncing(false);
     fetchLeaderboard();
   };
 
