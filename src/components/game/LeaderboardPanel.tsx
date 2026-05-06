@@ -45,6 +45,32 @@ export default function LeaderboardPanel() {
     }
   }, [user, sortBy]);
 
+  // Realtime subscription — refresh leaderboard when any row changes
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel('leaderboard-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'leaderboard' },
+        () => fetchLeaderboard()
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, sortBy]);
+
+  // Auto-sync current player's score every 20 seconds so leaderboard stays fresh
+  useEffect(() => {
+    if (!user) return;
+    const interval = setInterval(() => {
+      syncScore(true);
+    }, 20000);
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, state.totalEarned, state.day, state.itemsSold, state.reputation, state.prestigeLevel]);
+
   const fetchLeaderboard = async () => {
     setLoading(true);
     const { data, error } = await supabase
@@ -59,9 +85,9 @@ export default function LeaderboardPanel() {
     setLoading(false);
   };
 
-  const syncScore = async () => {
+  const syncScore = async (silent = false) => {
     if (!user) return;
-    setSyncing(true);
+    if (!silent) setSyncing(true);
     
     const profile = await supabase
       .from('profiles')
@@ -94,7 +120,7 @@ export default function LeaderboardPanel() {
       await supabase.from('leaderboard').insert(payload);
     }
 
-    setSyncing(false);
+    if (!silent) setSyncing(false);
     fetchLeaderboard();
   };
 
@@ -132,7 +158,7 @@ export default function LeaderboardPanel() {
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <h2 className="text-lg font-heading font-bold">🏆 Leaderboard</h2>
-        <Button onClick={syncScore} disabled={syncing} size="sm">
+        <Button onClick={() => syncScore()} disabled={syncing} size="sm">
           {syncing ? '⏳ Menyimpan...' : '📤 Sync Skor'}
         </Button>
       </div>
