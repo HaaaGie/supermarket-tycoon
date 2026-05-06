@@ -45,6 +45,32 @@ export default function LeaderboardPanel() {
     }
   }, [user, sortBy]);
 
+  // Realtime subscription — refresh leaderboard when any row changes
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel('leaderboard-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'leaderboard' },
+        () => fetchLeaderboard()
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, sortBy]);
+
+  // Auto-sync current player's score every 20 seconds so leaderboard stays fresh
+  useEffect(() => {
+    if (!user) return;
+    const interval = setInterval(() => {
+      syncScore(true);
+    }, 20000);
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, state.totalEarned, state.day, state.itemsSold, state.reputation, state.prestigeLevel]);
+
   const fetchLeaderboard = async () => {
     setLoading(true);
     const { data, error } = await supabase
