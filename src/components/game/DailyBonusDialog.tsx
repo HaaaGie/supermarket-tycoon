@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useGame } from '@/game/GameContext';
+import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 
 /**
  * Daily Login Bonus + Offline Reward.
- * - Streak-based bonus: $250 + 5💎 base, +50% per streak day, capped at 7 days.
- * - Resets streak if >36h since last claim.
- * - Offline reward: $0.5/minute (capped at 8h = 480 min) of away-time.
- *   Only shown if >5 minutes since last session and player has earned >$1k total.
+ *
+ * v2.4 fix: After claim we IMMEDIATELY persist `lastDailyClaimAt` to BOTH
+ * localStorage and the active cloud save slot. Previously cloud autosave ran
+ * only every 15s, so a quick refresh/back-to-menu after claiming would reload
+ * the old cloud state and re-trigger the daily bonus dialog.
  */
 export default function DailyBonusDialog() {
   const { state, dispatch } = useGame();
@@ -23,7 +25,6 @@ export default function DailyBonusDialog() {
     const hoursSinceClaim = (now - last) / (1000 * 60 * 60);
     const minutesAway = Math.max(0, Math.floor((now - lastSession) / (1000 * 60)));
 
-    // Daily bonus: claimable every 20+ hours
     if (hoursSinceClaim >= 20) {
       const prevStreak = state.dailyStreak || 0;
       const newStreak = hoursSinceClaim < 48 ? Math.min(7, prevStreak + 1) : 1;
@@ -33,7 +34,6 @@ export default function DailyBonusDialog() {
       setShow(true);
     }
 
-    // Offline reward (only if game ran before, away >5min, ≤8h)
     if (lastSession > 0 && minutesAway > 5 && state.totalEarned > 1000) {
       const cappedMinutes = Math.min(minutesAway, 480);
       const money = Math.floor(cappedMinutes * 0.5 * (1 + (state.prestigeLevel || 0) * 0.1));
@@ -42,7 +42,6 @@ export default function DailyBonusDialog() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Track session end on unload
   useEffect(() => {
     const onUnload = () => {
       try {
@@ -58,9 +57,59 @@ export default function DailyBonusDialog() {
     return () => window.removeEventListener('beforeunload', onUnload);
   }, []);
 
+  const persistClaimImmediately = async (
+    newStreak: number,
+    claimedMoney: number,
+    claimedGems: number,
+    offlineMoney: number,
+  ) => {
+    // 1) localStorage — survives a hard refresh.
+    try {
+      const saved = localStorage.getItem('supermarket_save');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        parsed.lastDailyClaimAt = Date.now();
+        parsed.dailyStreak = newStreak;
+        parsed.money = (parsed.money || 0) + claimedMoney + offlineMoney;
+        parsed.gems = (parsed.gems || 0) + claimedGems;
+        if (offlineMoney > 0) parsed.lastSessionEndAt = Date.now();
+        localStorage.setItem('supermarket_save', JSON.stringify(parsed));
+      }
+    } catch {}
+
+    // 2) Cloud — survives switching device or main-menu re-entry.
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      const activeSlot = localStorage.getItem('active_slot');
+      if (!activeSlot) return;
+      const { data: slot } = await supabase
+        .from('save_slots')
+        .select('game_state')
+        .eq('user_id', session.user.id)
+        .eq('slot_number', parseInt(activeSlot))
+        .maybeSingle();
+      const current = (slot?.game_state as any) || {};
+      const merged = {
+        ...current,
+        lastDailyClaimAt: Date.now(),
+        dailyStreak: newStreak,
+        money: (current.money || 0) + claimedMoney + offlineMoney,
+        gems: (current.gems || 0) + claimedGems,
+        ...(offlineMoney > 0 ? { lastSessionEndAt: Date.now() } : {}),
+      };
+      await supabase
+        .from('save_slots')
+        .update({ game_state: merged })
+        .eq('user_id', session.user.id)
+        .eq('slot_number', parseInt(activeSlot));
+    } catch {}
+  };
+
   const claim = () => {
     dispatch({ type: 'CLAIM_DAILY_BONUS', money: bonus.money, gems: bonus.gems, streak: bonus.streak });
     if (offline) dispatch({ type: 'CLAIM_OFFLINE_REWARD', money: offline.money, minutes: offline.minutes });
+    persistClaimImmediately(bonus.streak, bonus.money, bonus.gems, offline?.money || 0);
     setShow(false);
   };
 
