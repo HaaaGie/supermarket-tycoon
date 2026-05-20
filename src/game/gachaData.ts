@@ -265,6 +265,62 @@ export const GACHA_ITEMS: GachaItem[] = [
   { id: 'cos_store_snowflake', name: 'Toko Kepingan Salju', emoji: '❄️', rarity: 'legendary', type: 'cosmetic', description: '❄️ WINTER LIMITED — Toko kristal salju', exclusiveSeason: 'winter', cosmeticEmoji: '❄️' },
   { id: 'cos_store_santa', name: 'Toko Santa', emoji: '🎅', rarity: 'epic', type: 'cosmetic', description: '❄️ WINTER LIMITED — Toko Sinterklas', exclusiveSeason: 'winter', cosmeticEmoji: '🎅' },
   { id: 'title_winter_lord', name: 'Gelar: Winter Lord', emoji: '🧊', rarity: 'epic', type: 'title', description: '❄️ WINTER LIMITED — "Winter Lord"', exclusiveSeason: 'winter' },
+
+  // === v2.4 — NEW GACHA CONTENT ===
+  // -- Themes --
+  { id: 'theme_coral_reef', name: 'Tema Karang Laut', emoji: '🐠', rarity: 'rare', type: 'theme', description: 'Terumbu karang warna-warni',
+    themeColorsLight: { primary: '180 70% 45%', secondary: '15 80% 60%', accent: '50 85% 55%', background: '190 35% 95%', card: '190 45% 98%' },
+    themeColorsDark: { primary: '180 75% 50%', secondary: '15 85% 55%', accent: '50 90% 55%', background: '195 35% 7%', card: '195 30% 11%' } },
+  { id: 'theme_obsidian', name: 'Tema Obsidian', emoji: '🪨', rarity: 'epic', type: 'theme', description: 'Hitam mengkilap berkilauan ungu',
+    themeColorsLight: { primary: '270 30% 25%', secondary: '260 40% 35%', accent: '290 60% 50%', background: '270 10% 92%', card: '270 15% 96%' },
+    themeColorsDark: { primary: '270 60% 60%', secondary: '260 50% 50%', accent: '290 75% 65%', background: '270 25% 5%', card: '270 22% 9%' } },
+  { id: 'theme_bubblegum', name: 'Tema Bubblegum', emoji: '🍭', rarity: 'rare', type: 'theme', description: 'Permen pink-biru manis',
+    themeColorsLight: { primary: '320 80% 65%', secondary: '195 75% 60%', accent: '50 90% 60%', background: '320 30% 96%', card: '320 40% 99%' },
+    themeColorsDark: { primary: '320 75% 60%', secondary: '195 70% 55%', accent: '50 85% 55%', background: '310 25% 9%', card: '310 22% 13%' } },
+  { id: 'theme_phantom', name: 'Tema Phantom', emoji: '👻', rarity: 'legendary', type: 'theme', description: 'Hantu transparan berkabut',
+    themeColorsLight: { primary: '260 25% 45%', secondary: '210 20% 50%', accent: '280 35% 55%', background: '260 15% 93%', card: '260 20% 97%' },
+    themeColorsDark: { primary: '260 50% 70%', secondary: '210 40% 65%', accent: '280 60% 70%', background: '255 30% 8%', card: '255 25% 12%' } },
+  { id: 'theme_celestial', name: 'Tema Celestial', emoji: '✨', rarity: 'mythical', type: 'theme', description: '✨ MYTHICAL — Langit malam berkilauan bintang & bulan keemasan',
+    themeColorsLight: { primary: '240 70% 50%', secondary: '45 90% 55%', accent: '280 75% 60%', background: '230 40% 95%', card: '230 50% 98%' },
+    themeColorsDark: { primary: '240 90% 70%', secondary: '45 100% 60%', accent: '280 90% 70%', background: '235 50% 5%', card: '235 45% 9%' } },
+
+  // -- Cosmetics (Store Icons) --
+  { id: 'cos_store_taco', name: 'Toko Taco', emoji: '🌮', rarity: 'common', type: 'cosmetic', description: 'Ikon toko berubah jadi taco', cosmeticEmoji: '🌮' },
+  { id: 'cos_store_donut', name: 'Toko Donat', emoji: '🍩', rarity: 'common', type: 'cosmetic', description: 'Ikon toko berubah jadi donat', cosmeticEmoji: '🍩' },
+  { id: 'cos_store_pizza', name: 'Toko Pizza', emoji: '🍕', rarity: 'rare', type: 'cosmetic', description: 'Ikon toko berubah jadi pizza', cosmeticEmoji: '🍕' },
+  { id: 'cos_store_treasure', name: 'Toko Peti Harta', emoji: '🪙', rarity: 'epic', type: 'cosmetic', description: 'Ikon toko berubah jadi peti harta karun', cosmeticEmoji: '🪙' },
+  { id: 'cos_store_ship', name: 'Toko Kapal Bajak Laut', emoji: '🏴‍☠️', rarity: 'epic', type: 'cosmetic', description: 'Ikon toko berubah jadi kapal bajak laut', cosmeticEmoji: '🏴‍☠️' },
+  { id: 'cos_store_lighthouse', name: 'Toko Mercusuar', emoji: '🗼', rarity: 'rare', type: 'cosmetic', description: 'Ikon toko berubah jadi mercusuar', cosmeticEmoji: '🗼' },
+  { id: 'cos_store_temple', name: 'Toko Kuil', emoji: '⛩️', rarity: 'legendary', type: 'cosmetic', description: 'Ikon toko berubah jadi kuil torii', cosmeticEmoji: '⛩️' },
+  { id: 'cos_store_meteor', name: 'Toko Meteor', emoji: '☄️', rarity: 'mythical', type: 'cosmetic', description: '✨ MYTHICAL — Meteor jatuh berkilauan', cosmeticEmoji: '☄️' },
+
+  // -- Buffs (use existing supported stats: profit, speed, customer, money_rain, gem_finder, xp_boost, all) --
+  { id: 'buff_profit_mega', name: 'Mahkota Sang Raja', emoji: '👑', rarity: 'legendary', type: 'buff', description: '+100% profit selama 2 menit',
+    buffEffect: { stat: 'profit', multiplier: 2.0, durationTicks: 240 } },
+  { id: 'buff_speed_mega', name: 'Tornado', emoji: '🌪️', rarity: 'epic', type: 'buff', description: '+100% kecepatan jual 90 detik',
+    buffEffect: { stat: 'speed', multiplier: 2.0, durationTicks: 180 } },
+  { id: 'buff_customer_horde', name: 'Festival Diskon', emoji: '🎉', rarity: 'legendary', type: 'buff', description: '+200% pelanggan selama 90 detik',
+    buffEffect: { stat: 'customer', multiplier: 3.0, durationTicks: 180 } },
+  { id: 'buff_money_storm', name: 'Badai Uang', emoji: '🌧️', rarity: 'mythical', type: 'buff', description: '✨ +$500/tick selama 90 detik',
+    buffEffect: { stat: 'money_rain', multiplier: 500, durationTicks: 180 } },
+  { id: 'buff_gem_mine', name: 'Tambang Permata', emoji: '⛏️', rarity: 'legendary', type: 'buff', description: '+2 gem per penjualan selama 90 detik',
+    buffEffect: { stat: 'gem_finder', multiplier: 2.0, durationTicks: 180 } },
+  { id: 'buff_xp_mega', name: 'Akademi Bintang', emoji: '🎓', rarity: 'epic', type: 'buff', description: '+200% XP pegawai selama 3 menit',
+    buffEffect: { stat: 'xp_boost', multiplier: 3.0, durationTicks: 360 } },
+  { id: 'buff_omnipotent', name: 'Mata Dewa', emoji: '🌟', rarity: 'mythical', type: 'buff', description: '✨ 3x SEMUA bonus selama 60 detik!',
+    buffEffect: { stat: 'all', multiplier: 3.0, durationTicks: 120 } },
+
+  // -- Titles --
+  { id: 'title_merchant', name: 'Gelar: Saudagar', emoji: '🧾', rarity: 'common', type: 'title', description: 'Gelar "Saudagar" di profil' },
+  { id: 'title_strategist', name: 'Gelar: Ahli Strategi', emoji: '♟️', rarity: 'rare', type: 'title', description: 'Gelar "Ahli Strategi" di profil' },
+  { id: 'title_visionary', name: 'Gelar: Visioner', emoji: '🔭', rarity: 'epic', type: 'title', description: 'Gelar "Visioner" di profil' },
+  { id: 'title_celestial', name: 'Gelar: Celestial', emoji: '✨', rarity: 'legendary', type: 'title', description: 'Gelar "Celestial" di profil' },
+  { id: 'title_billionaire', name: 'Gelar: Miliarder', emoji: '💵', rarity: 'legendary', type: 'title', description: '🔒 Total earnings ≥ $100.000.000',
+    unlockCondition: { description: 'Total earnings ≥ $100.000.000', check: (s) => (s.totalEarned || 0) >= 100_000_000 } },
+  { id: 'title_collector', name: 'Gelar: Kolektor Sejati', emoji: '🗃️', rarity: 'epic', type: 'title', description: '🔒 Punya 50 item gacha unik.',
+    unlockCondition: { description: 'Inventory unik ≥ 50', check: (s) => new Set(s.gachaInventory || []).size >= 50 } },
+  { id: 'title_workaholic', name: 'Gelar: Workaholic', emoji: '☕', rarity: 'rare', type: 'title', description: '🔒 Selesaikan 50 side job.',
+    unlockCondition: { description: 'Side jobs selesai ≥ 50', check: (s) => (s.sideJobsCompleted || 0) >= 50 } },
 ];
 
 export const RARITY_CONFIG = {
