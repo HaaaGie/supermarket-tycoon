@@ -20,6 +20,7 @@ export type Database = {
           display_name: string
           id: string
           items_sold: number
+          last_active: string
           prestige_level: number
           reputation: number
           total_earned: number
@@ -31,6 +32,7 @@ export type Database = {
           display_name?: string
           id?: string
           items_sold?: number
+          last_active?: string
           prestige_level?: number
           reputation?: number
           total_earned?: number
@@ -42,6 +44,7 @@ export type Database = {
           display_name?: string
           id?: string
           items_sold?: number
+          last_active?: string
           prestige_level?: number
           reputation?: number
           total_earned?: number
