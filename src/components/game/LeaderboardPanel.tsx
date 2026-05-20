@@ -20,14 +20,8 @@ interface LeaderboardEntry {
 
 type SortKey = 'total_earned' | 'day_reached' | 'prestige_level' | 'items_sold' | 'reputation';
 
-const ONLINE_WINDOW_MS = 3 * 60 * 1000; // 3 minutes
-
-function isOnline(lastActive?: string) {
-  if (!lastActive) return false;
-  return Date.now() - new Date(lastActive).getTime() < ONLINE_WINDOW_MS;
-}
-
 function timeAgo(iso: string) {
+  if (!iso) return '';
   const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
   if (diff < 60) return `${diff}d lalu`;
   if (diff < 3600) return `${Math.floor(diff / 60)}m lalu`;
@@ -36,12 +30,11 @@ function timeAgo(iso: string) {
 }
 
 export default function LeaderboardPanel() {
-  const { state } = useGame();
+  useGame(); // keep hook order stable; not used directly
   const [user, setUser] = useState<User | null>(null);
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState<SortKey>('total_earned');
-  const [now, setNow] = useState(Date.now());
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -77,12 +70,6 @@ export default function LeaderboardPanel() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, sortBy]);
-
-  // Tick clock every 15s so "online" dots & timeAgo refresh
-  useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 15000);
-    return () => clearInterval(t);
-  }, []);
 
   // Refetch every 30s as a safety net (in case realtime drops)
   useEffect(() => {
@@ -134,7 +121,6 @@ export default function LeaderboardPanel() {
     );
   }
 
-  const onlineCount = entries.filter(e => isOnline(e.last_active)).length;
   const champion = entries[0];
 
   return (
@@ -152,9 +138,6 @@ export default function LeaderboardPanel() {
           <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-muted text-muted-foreground">
             👥 {entries.length} pemain
           </span>
-          <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-green-500/10 text-green-600 dark:text-green-400 font-medium">
-            🟢 {onlineCount} online
-          </span>
         </div>
       </div>
 
@@ -167,11 +150,8 @@ export default function LeaderboardPanel() {
               <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">
                 Champion Saat Ini
               </div>
-              <div className="font-heading font-bold truncate flex items-center gap-2">
+              <div className="font-heading font-bold truncate">
                 {champion.display_name}
-                {isOnline(champion.last_active) && (
-                  <span className="text-[10px] text-green-600 dark:text-green-400 font-bold">● ONLINE</span>
-                )}
               </div>
               <div className="text-xs text-muted-foreground">
                 💰 ${champion.total_earned.toLocaleString()} · 📅 Hari {champion.day_reached} · 👑 P{champion.prestige_level}
@@ -212,7 +192,6 @@ export default function LeaderboardPanel() {
         <div className="space-y-2">
           {entries.map((entry, idx) => {
             const isMe = entry.user_id === user.id;
-            const online = isOnline(entry.last_active);
             return (
               <Card key={entry.id} className={`transition-all ${isMe ? 'ring-2 ring-primary bg-primary/5' : ''}`}>
                 <CardContent className="py-3 px-4">
@@ -222,13 +201,7 @@ export default function LeaderboardPanel() {
                     </span>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-heading font-medium text-sm truncate flex items-center gap-1.5">
-                          {online && (
-                            <span
-                              className="inline-block h-2 w-2 rounded-full bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.8)]"
-                              title="Online sekarang"
-                            />
-                          )}
+                        <span className="font-heading font-medium text-sm truncate">
                           {entry.display_name}
                         </span>
                         {isMe && (
@@ -237,7 +210,7 @@ export default function LeaderboardPanel() {
                           </span>
                         )}
                         <span className="text-[10px] text-muted-foreground ml-auto">
-                          {online ? 'online' : timeAgo(entry.last_active || entry.updated_at)}
+                          {timeAgo(entry.last_active || entry.updated_at)}
                         </span>
                       </div>
                       <div className="flex gap-3 text-xs text-muted-foreground mt-0.5 flex-wrap">
