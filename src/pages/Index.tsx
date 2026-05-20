@@ -54,6 +54,9 @@ function AutoSave() {
   }, []);
 
   useEffect(() => {
+    // Cloud autosave every 15s — also auto-updates the global leaderboard
+    // via a database trigger (sync_leaderboard_from_save), so the player's
+    // rank stays fresh even when they're idle on another tab.
     const interval = setInterval(async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
@@ -63,7 +66,7 @@ function AutoSave() {
       await supabase.from('save_slots').update({
         game_state: toSave as any,
       }).eq('user_id', session.user.id).eq('slot_number', parseInt(activeSlot));
-    }, 30000);
+    }, 15000);
     return () => clearInterval(interval);
   }, []);
 
