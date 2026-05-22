@@ -334,16 +334,49 @@ export default function ThemeEffects() {
   const themeItem = themeId ? GACHA_ITEMS.find(i => i.id === themeId) : null;
   const rarity = themeItem?.rarity || 'common';
 
-  // Inject GUI styles
+  // 🎨 STRONGER THEME DIFFERENTIATION — each theme overrides core color tokens
+  // so the entire app (buttons, headers, backgrounds, tabs) shifts color, not just
+  // card borders. HSL values match the theme's "vibe".
+  const THEME_PALETTES: Record<string, string> = {
+    theme_ocean:     `:root:not(.dark) { --primary: 200 90% 45%; --accent: 190 80% 55%; --background: 200 60% 96%; --card: 200 50% 99%; --ring: 200 90% 50%; --secondary: 195 50% 88%; }`,
+    theme_sakura:    `:root:not(.dark) { --primary: 335 80% 60%; --accent: 320 70% 70%; --background: 340 70% 97%; --card: 340 60% 99%; --ring: 335 80% 60%; --secondary: 340 50% 92%; }`,
+    theme_forest:    `:root:not(.dark) { --primary: 145 65% 35%; --accent: 100 50% 45%; --background: 100 35% 96%; --card: 100 30% 99%; --ring: 145 65% 40%; --secondary: 120 35% 88%; }`,
+    theme_sunset:    `:root:not(.dark) { --primary: 20 90% 55%; --accent: 320 70% 60%; --background: 30 80% 96%; --card: 35 70% 99%; --ring: 20 90% 55%; --secondary: 25 60% 90%; }`,
+    theme_midnight:  `:root { --primary: 270 85% 65%; --accent: 200 90% 60%; --background: 250 35% 10%; --card: 250 30% 15%; --foreground: 260 30% 92%; --muted-foreground: 260 20% 70%; --ring: 270 85% 65%; --secondary: 250 30% 22%; --border: 260 30% 25%; --input: 260 30% 22%; }`,
+    theme_candy:     `:root:not(.dark) { --primary: 300 75% 60%; --accent: 50 90% 55%; --background: 320 80% 97%; --card: 320 70% 99%; --ring: 300 75% 60%; --secondary: 300 50% 92%; }`,
+    theme_royal:     `:root:not(.dark) { --primary: 0 75% 42%; --accent: 45 95% 50%; --background: 40 60% 96%; --card: 45 70% 98%; --ring: 45 95% 50%; --secondary: 40 50% 90%; }`,
+    theme_retro:     `:root:not(.dark) { --primary: 330 75% 50%; --accent: 195 80% 45%; --background: 50 70% 95%; --card: 55 75% 98%; --ring: 330 75% 50%; --secondary: 200 50% 88%; }`,
+    theme_neon:      `:root { --primary: 160 100% 45%; --accent: 290 90% 60%; --background: 220 35% 8%; --card: 220 30% 12%; --foreground: 160 50% 92%; --muted-foreground: 160 30% 70%; --ring: 160 100% 50%; --secondary: 220 30% 20%; --border: 160 60% 25%; --input: 220 30% 18%; }`,
+    theme_autumn:    `:root:not(.dark) { --primary: 25 85% 45%; --accent: 15 80% 50%; --background: 30 60% 95%; --card: 35 65% 98%; --ring: 25 85% 45%; --secondary: 30 50% 88%; }`,
+    theme_winter:    `:root:not(.dark) { --primary: 205 80% 50%; --accent: 195 70% 60%; --background: 205 60% 97%; --card: 205 50% 99%; --ring: 205 80% 55%; --secondary: 205 40% 90%; }`,
+    theme_cyberpunk: `:root { --primary: 195 100% 50%; --accent: 340 90% 60%; --background: 240 40% 6%; --card: 240 35% 10%; --foreground: 195 60% 92%; --muted-foreground: 195 30% 65%; --ring: 195 100% 55%; --secondary: 240 30% 18%; --border: 195 70% 28%; --input: 240 30% 16%; }`,
+    theme_lavender:  `:root:not(.dark) { --primary: 270 55% 55%; --accent: 290 50% 65%; --background: 270 60% 97%; --card: 270 50% 99%; --ring: 270 55% 60%; --secondary: 270 35% 90%; }`,
+    theme_galaxy:    `:root { --primary: 270 90% 65%; --accent: 310 85% 60%; --background: 250 40% 8%; --card: 250 35% 13%; --foreground: 270 30% 92%; --muted-foreground: 270 20% 70%; --ring: 270 90% 65%; --secondary: 250 30% 22%; --border: 270 50% 28%; --input: 250 30% 20%; }`,
+    theme_volcano:   `:root:not(.dark) { --primary: 15 90% 50%; --accent: 0 80% 45%; --background: 20 60% 95%; --card: 25 65% 98%; --ring: 15 90% 50%; --secondary: 20 50% 88%; }`,
+    theme_emerald:   `:root:not(.dark) { --primary: 155 80% 38%; --accent: 170 70% 45%; --background: 155 50% 96%; --card: 155 40% 99%; --ring: 155 80% 42%; --secondary: 155 35% 88%; }`,
+    theme_pastel:    `:root:not(.dark) { --primary: 340 70% 70%; --accent: 200 65% 70%; --background: 340 80% 98%; --card: 340 70% 99%; --ring: 340 70% 70%; --secondary: 200 50% 92%; }`,
+    theme_monochrome:`:root:not(.dark) { --primary: 0 0% 15%; --accent: 0 0% 35%; --background: 0 0% 96%; --card: 0 0% 99%; --ring: 0 0% 15%; --secondary: 0 0% 88%; }`,
+    theme_steampunk: `:root:not(.dark) { --primary: 30 70% 40%; --accent: 40 75% 50%; --background: 35 40% 92%; --card: 35 45% 96%; --ring: 30 70% 45%; --secondary: 30 35% 84%; }`,
+    theme_aurora:    `:root { --primary: 170 85% 50%; --accent: 270 80% 65%; --background: 215 45% 9%; --card: 215 40% 14%; --foreground: 170 40% 92%; --muted-foreground: 170 25% 70%; --ring: 170 85% 55%; --secondary: 215 30% 22%; --border: 170 60% 28%; --input: 215 30% 20%; }`,
+    theme_desert:    `:root:not(.dark) { --primary: 40 85% 50%; --accent: 25 70% 55%; --background: 40 60% 95%; --card: 40 65% 98%; --ring: 40 85% 50%; --secondary: 40 50% 88%; }`,
+    theme_dragon:    `:root:not(.dark) { --primary: 15 85% 45%; --accent: 40 95% 50%; --background: 25 65% 95%; --card: 30 70% 98%; --ring: 15 85% 50%; --secondary: 25 50% 88%; }`,
+    theme_sakura_eternal: `:root:not(.dark) { --primary: 335 90% 60%; --accent: 280 70% 65%; --background: 335 75% 97%; --card: 335 65% 99%; --ring: 335 90% 60%; --secondary: 335 50% 92%; }`,
+    theme_solar_eclipse:  `:root { --primary: 40 100% 55%; --accent: 15 95% 50%; --background: 240 30% 8%; --card: 240 25% 13%; --foreground: 40 40% 92%; --muted-foreground: 40 25% 70%; --ring: 40 100% 55%; --secondary: 240 25% 22%; --border: 40 60% 30%; --input: 240 25% 20%; }`,
+    theme_harvest_king:   `:root:not(.dark) { --primary: 20 90% 45%; --accent: 40 95% 50%; --background: 30 65% 95%; --card: 35 70% 98%; --ring: 20 90% 50%; --secondary: 30 50% 88%; }`,
+    theme_frostbite:      `:root:not(.dark) { --primary: 195 95% 45%; --accent: 270 75% 60%; --background: 195 70% 96%; --card: 195 60% 99%; --ring: 195 95% 50%; --secondary: 195 40% 88%; }`,
+    theme_unemployment:   `:root:not(.dark) { --primary: 220 12% 45%; --accent: 220 10% 55%; --background: 220 12% 92%; --card: 220 10% 96%; --ring: 220 12% 45%; --secondary: 220 10% 86%; }`,
+  };
+
+  // Inject GUI styles + color palette
   useEffect(() => {
     if (styleRef.current) {
       styleRef.current.remove();
       styleRef.current = null;
     }
-    if (themeId && THEME_GUI_STYLES[themeId]) {
+    if (themeId && (THEME_GUI_STYLES[themeId] || THEME_PALETTES[themeId])) {
       const style = document.createElement('style');
       style.setAttribute('data-theme-effects', themeId);
-      style.textContent = THEME_GUI_STYLES[themeId];
+      style.textContent = (THEME_PALETTES[themeId] || '') + '\n' + (THEME_GUI_STYLES[themeId] || '');
       document.head.appendChild(style);
       styleRef.current = style;
     }

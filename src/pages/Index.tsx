@@ -57,7 +57,7 @@ function AutoSave() {
     // Cloud autosave every 15s — also auto-updates the global leaderboard
     // via a database trigger (sync_leaderboard_from_save), so the player's
     // rank stays fresh even when they're idle on another tab.
-    const interval = setInterval(async () => {
+    const flushToCloud = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
       const activeSlot = localStorage.getItem('active_slot');
@@ -66,8 +66,24 @@ function AutoSave() {
       await supabase.from('save_slots').update({
         game_state: toSave as any,
       }).eq('user_id', session.user.id).eq('slot_number', parseInt(activeSlot));
-    }, 15000);
-    return () => clearInterval(interval);
+    };
+
+    const interval = setInterval(flushToCloud, 15000);
+
+    // 🔧 FIX SAVE PERSISTENCE: also flush whenever the tab is hidden
+    // (player switches app, closes tab, locks phone). Without this, progress
+    // made in the last <15s is lost on close.
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') flushToCloud();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('pagehide', flushToCloud);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('pagehide', flushToCloud);
+    };
   }, []);
 
   return null;
@@ -138,10 +154,23 @@ export default function Index() {
     setShowMenu(false);
   }, []);
 
-  const handleBackToMenu = useCallback(() => {
+  const handleBackToMenu = useCallback(async () => {
     if (gameState) {
       const { notifications, ...toSave } = gameState;
       localStorage.setItem('supermarket_save', JSON.stringify(toSave));
+      // 🔧 FIX SAVE PERSISTENCE: also flush to cloud immediately so progress
+      // isn't lost when the player returns to the menu before the 15s autosave fires.
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const activeSlot = localStorage.getItem('active_slot');
+        if (session && activeSlot) {
+          await supabase.from('save_slots').update({
+            game_state: toSave as any,
+          }).eq('user_id', session.user.id).eq('slot_number', parseInt(activeSlot));
+        }
+      } catch (e) {
+        console.warn('Cloud flush on back-to-menu failed', e);
+      }
     }
     setShowMenu(true);
     setGameState(null);

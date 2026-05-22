@@ -121,8 +121,22 @@ export default function MainMenu({ onStartGame }: MainMenuProps) {
     setSlots([null, null, null]);
   };
 
-  const handleLoadSlot = (slot: SaveSlot) => {
-    const gameState = { ...INITIAL_STATE, ...(slot.game_state as any), notifications: [], gameStarted: true };
+  const handleLoadSlot = async (slot: SaveSlot) => {
+    // 🔧 FIX SAVE PERSISTENCE: always refetch the freshest cloud state before loading
+    // so progress made in another tab/device isn't overwritten. Also set `active_slot`
+    // so the autosave in Index.tsx knows which slot to write back to.
+    let latestState = slot.game_state as any;
+    if (user) {
+      const { data: fresh } = await supabase
+        .from('save_slots')
+        .select('game_state')
+        .eq('user_id', user.id)
+        .eq('slot_number', slot.slot_number)
+        .maybeSingle();
+      if (fresh?.game_state) latestState = fresh.game_state;
+    }
+    localStorage.setItem('active_slot', String(slot.slot_number));
+    const gameState = { ...INITIAL_STATE, ...latestState, notifications: [], gameStarted: true };
     onStartGame(gameState);
   };
 
@@ -137,16 +151,24 @@ export default function MainMenu({ onStartGame }: MainMenuProps) {
         game_state: toSave as any,
       }, { onConflict: 'user_id,slot_number' });
     }
+    // 🔧 FIX SAVE PERSISTENCE: tell autosave which slot to write to.
+    localStorage.setItem('active_slot', String(slotNumber));
     onStartGame(newState);
   };
 
   const handleDeleteSlot = async (slotNumber: number) => {
     if (!user) return;
     await supabase.from('save_slots').delete().eq('user_id', user.id).eq('slot_number', slotNumber);
+    if (localStorage.getItem('active_slot') === String(slotNumber)) {
+      localStorage.removeItem('active_slot');
+    }
     await loadSlots();
   };
 
   const handlePlayWithoutLogin = () => {
+    // No cloud slot when playing offline — clear the marker so autosave doesn't
+    // try to write to a stale slot from a previous logged-in session.
+    localStorage.removeItem('active_slot');
     const saved = localStorage.getItem('supermarket_save');
     if (saved) {
       try {
