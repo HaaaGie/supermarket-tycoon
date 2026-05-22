@@ -159,10 +159,16 @@ export default function MainMenu({ onStartGame }: MainMenuProps) {
   const handleDeleteSlot = async (slotNumber: number) => {
     if (!user) return;
     await supabase.from('save_slots').delete().eq('user_id', user.id).eq('slot_number', slotNumber);
+    if (localStorage.getItem('active_slot') === String(slotNumber)) {
+      localStorage.removeItem('active_slot');
+    }
     await loadSlots();
   };
 
   const handlePlayWithoutLogin = () => {
+    // No cloud slot when playing offline — clear the marker so autosave doesn't
+    // try to write to a stale slot from a previous logged-in session.
+    localStorage.removeItem('active_slot');
     const saved = localStorage.getItem('supermarket_save');
     if (saved) {
       try {
