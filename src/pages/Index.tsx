@@ -138,10 +138,23 @@ export default function Index() {
     setShowMenu(false);
   }, []);
 
-  const handleBackToMenu = useCallback(() => {
+  const handleBackToMenu = useCallback(async () => {
     if (gameState) {
       const { notifications, ...toSave } = gameState;
       localStorage.setItem('supermarket_save', JSON.stringify(toSave));
+      // 🔧 FIX SAVE PERSISTENCE: also flush to cloud immediately so progress
+      // isn't lost when the player returns to the menu before the 15s autosave fires.
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const activeSlot = localStorage.getItem('active_slot');
+        if (session && activeSlot) {
+          await supabase.from('save_slots').update({
+            game_state: toSave as any,
+          }).eq('user_id', session.user.id).eq('slot_number', parseInt(activeSlot));
+        }
+      } catch (e) {
+        console.warn('Cloud flush on back-to-menu failed', e);
+      }
     }
     setShowMenu(true);
     setGameState(null);
